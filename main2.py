@@ -24,7 +24,8 @@ image_shape = frame.shape
 # Inicialización de variables
 detections = []
 already_crossed = []
-margin = 15
+y_margin = 15
+x_margin = 15
 
 while True:
 
@@ -56,13 +57,24 @@ while True:
         class_name = results[0].names[int(box.cls[0])]
         detections.append({'cx': cx, 'cy': cy, 'class_name': class_name})
 
-        if abs(cy - signal_line) < margin:
+
+        is_crossing_line = abs(cy - signal_line) < y_margin
+        is_in_already_clossed = any([abs(cx-cx_crossed) < x_margin for cx_crossed in already_crossed])
+        if is_crossing_line and not is_in_already_clossed:
             color = (0, 255, 0)
+            already_crossed.append(cx)
+            signal = True
+            print('Ha cruzado pipa o pipa pelada.')
         else:
             color = (0, 0, 255)
         # cv2.circle(annotated_frame, (int(cx), int(cy)), 3, color, -1)
-        cv2.line(annotated_frame, (int(cx), int(cy-margin)), (int(cx), int(cy+margin)), color, 2)
+        cv2.line(annotated_frame, (int(cx), int(cy-y_margin)), (int(cx), int(cy+y_margin)), color, 2)
         
+        # # Eliminar las que ya no estén cruzando
+        # for x in already_crossed:
+        #     for detection in detections:
+        #         if 
+    
         
 
     # Activar señal de pipa cruzando

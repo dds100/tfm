@@ -1,0 +1,14 @@
+# Archivos de caché de Python
+*.pyc
+
+# Archivos de imagen
+*.jpg
+*.png
+
+# Archivos de vídeo
+*.avi
+*.mp4
+
+# Pesos
+*.pt
+

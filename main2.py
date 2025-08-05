@@ -15,6 +15,10 @@ if not cap.isOpened():
     exit()
 print("Presiona 'q' para salir...")
 
+# Cambiar exposición de la cámara
+cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)
+cap.set(cv2.CAP_PROP_EXPOSURE, -6.5)
+
 ret, frame = cap.read()
 if not ret:
     print('Error abriendo cámara.')
@@ -24,8 +28,9 @@ image_shape = frame.shape
 # Inicialización de variables
 detections = []
 already_crossed = []
-y_margin = 25
+y_margin = 15
 x_margin = 15
+DEBUG = False
 
 while True:
 
@@ -44,11 +49,11 @@ while True:
     # Dibujar los resultados sobre el frame
     annotated_frame = results[0].plot()
     cycle_time = time.time() - inicio
-    cv2.putText(annotated_frame, f'FPS:{1/cycle_time:.2f}', (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 1)
+    if DEBUG: cv2.putText(annotated_frame, f'FPS:{1/cycle_time:.2f}', (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 1)
 
     # Dibujar línea arbitraria de cruce
     signal_line = 120
-    cv2.line(annotated_frame, (0, signal_line), (image_shape[1], signal_line), (0, 0, 255), 2)
+    if DEBUG: cv2.line(annotated_frame, (0, signal_line), (image_shape[1], signal_line), (0, 0, 255), 2)
 
     # Generar una lista con clase y centro (o punto)
     crossing_detections = []
@@ -68,11 +73,12 @@ while True:
                 print(f'Ha cruzado {detection["class_name"]}.')
         else:
             color = (0, 0, 255)
-        cv2.line(annotated_frame, (int(cx), int(cy-y_margin)), (int(cx), int(cy+y_margin)), color, 2)
+        if DEBUG: cv2.line(annotated_frame, (int(cx), int(cy-y_margin)), (int(cx), int(cy+y_margin)), color, 2)
         
     # Pintar de más oscuro las zonas ya cruzadas
-    for x in already_crossed:
-        cv2.line(annotated_frame, (x-x_margin, signal_line), (x+x_margin, signal_line), (0, 0, 100), 2)
+    if DEBUG: 
+        for x in already_crossed:
+            cv2.line(annotated_frame, (x-x_margin, signal_line), (x+x_margin, signal_line), (0, 0, 100), 2)
 
     # Eliminar las que ya no estén cruzando
     new_already_crossed = []
@@ -89,12 +95,13 @@ while True:
     # Activar señal de pipa cruzando
 
 
-    # # Mostrar el frame con resultados
-    cv2.imshow("YOLOv8 - Webcam", annotated_frame)
+    # Mostrar el frame con resultados
+    if DEBUG:
+        cv2.imshow("YOLOv8 - Webcam", annotated_frame)
+        if cv2.waitKey(1) & 0xFF == ord("q"):
+            break
 
-    # Salir con 'q'
-    if cv2.waitKey(1) & 0xFF == ord("q"):
-        break
+    
 
 # Liberar recursos
 cap.release()
